@@ -73,11 +73,11 @@ void doBlockchainTests(json_spirit::mValue& _v, bool _fillin)
 		ImportTest importer(o, _fillin, testType::BlockChainTests);
 		TransientDirectory td_stateDB_tmp;
 		BlockHeader biGenesisBlock = constructBlock(o["genesisBlockHeader"].get_obj(), h256{});
-
 		State trueState(OverlayDB(State::openDB(td_stateDB_tmp.path(), h256{}, WithExisting::Kill)), BaseState::Empty);
 		ImportTest::importState(o["pre"].get_obj(), trueState);
 		o["pre"] = fillJsonWithState(trueState); //convert all fields to hex
 		trueState.commit();
+
 
 		/// Trick
 		//merge into init state string our test predefined state and change difficulty for testing
@@ -144,7 +144,7 @@ void doBlockchainTests(json_spirit::mValue& _v, bool _fillin)
 				vBiBlocks.push_back(biGenesisBlock);
 
 				TransientDirectory td_stateDB, td_bc;
-				FullBlockChain<Ethash> bc(rlpGenesisBlock.out(), AccountMap(), td_bc.path(), WithExisting::Kill);
+				FullBlockChain<Ethash> bc(rlpGenesisBlock.out(), AccountMap(), td_bc.path(), WithExisting::Kill);				
 
 				//OverlayDB database (State::openDB(td_stateDB.path(), h256{}, WithExisting::Kill));
 				State state = importer.m_statePre;
@@ -206,9 +206,8 @@ void doBlockchainTests(json_spirit::mValue& _v, bool _fillin)
 				//block.commitToSeal(bc);
 
 				//Block block(State::openDB(bc.genesisHash()), BaseState::Empty, biGenesisBlock.beneficiary());
-				Block block = bc.genesisBlock(State::openDB(bc.genesisHash()));
-				//u256 diff = block.info().difficulty(); NOT WORKING!!!!
-				//diff+=1;
+				Block block = bc.genesisBlock(State::openDB(bc.genesisHash())); //NOT CLEAR WHAT IT RETURNS IF bc INITIALIZED WITH CUSTOM GENESIS BLOCK
+				//Block block (State::openDB(biGenesisBlock.hash()));
 				//Block block(state.db(), BaseState::Empty);
 				//mine a new block on top of previously imported
 				try
@@ -284,7 +283,7 @@ void doBlockchainTests(json_spirit::mValue& _v, bool _fillin)
 				if (sha3(RLP(block.blockData())[0].data()) != sha3(RLP(block2.out())[0].data()))
 				{
 					cnote << "block header mismatch block.blockData() vs updated block.info()\n";
-					cerr << toHex(block.blockData()) << "vs" << toHex(block2.out());
+					cerr << toHex(RLP(block.blockData())[0].data()) << "vs" << toHex(RLP(block2.out())[0].data());
 				}
 
 				if (sha3(RLP(block.blockData())[1].data()) != sha3(RLP(block2.out())[1].data()))
