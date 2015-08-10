@@ -677,6 +677,8 @@ void Block::commitToSeal(BlockChain const& _bc, bytes const& _extraData)
 		m_currentBlock.setExtraData(ed);
 	}
 
+	m_currentBlock.setNumber(m_previousBlock.number()+1);
+	m_currentBlock.setDifficulty(m_currentBlock.calculateDifficulty(m_previousBlock));
 	m_committedToMine = true;
 }
 
