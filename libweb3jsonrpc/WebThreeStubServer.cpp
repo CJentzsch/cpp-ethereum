@@ -28,6 +28,7 @@
 #include <libdevcore/FileSystem.h>
 #include <libdevcore/CommonJS.h>
 #include <libethcore/KeyManager.h>
+#include <libethcore/ICAP.h>
 #include <libethereum/Executive.h>
 #include <libethereum/Block.h>
 #include <libwebthree/WebThree.h>
@@ -59,7 +60,7 @@ WebThreeStubServer::WebThreeStubServer(jsonrpc::AbstractServerConnector& _conn, 
 {
 	auto path = getDataDir() + "/.web3";
 	fs::create_directories(path);
-	fs::permissions(path, fs::owner_all);
+	DEV_IGNORE_EXCEPTIONS(fs::permissions(path, fs::owner_all));
 	ldb::Options o;
 	o.create_if_missing = true;
 	ldb::DB::Open(o, path, &m_db);
@@ -189,7 +190,7 @@ Json::Value WebThreeStubServer::admin_eth_newAccount(Json::Value const& _info, s
 	if (!_info.isMember("name"))
 		throw jsonrpc::JsonRpcException("No member found: name");
 	string name = _info["name"].asString();
-	auto s = Secret::random();
+	auto s = ICAP::createDirect();
 	h128 uuid;
 	if (_info.isMember("password"))
 	{

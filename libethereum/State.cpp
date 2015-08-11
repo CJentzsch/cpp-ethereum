@@ -47,8 +47,6 @@ namespace fs = boost::filesystem;
 #define ctrace clog(StateTrace)
 #define ETH_TIMED_ENACTMENTS 0
 
-static const unsigned c_maxSyncTransactions = 256;
-
 const char* StateSafeExceptions::name() { return EthViolet "⚙" EthBlue " ℹ"; }
 const char* StateDetail::name() { return EthViolet "⚙" EthWhite " ◌"; }
 const char* StateTrace::name() { return EthViolet "⚙" EthGray " ◎"; }
@@ -85,7 +83,7 @@ OverlayDB State::openDB(std::string const& _basePath, h256 const& _genesisHash, 
 
 	path += "/" + toHex(_genesisHash.ref().cropped(0, 4)) + "/" + toString(c_databaseVersion);
 	boost::filesystem::create_directories(path);
-	fs::permissions(path, fs::owner_all);
+	DEV_IGNORE_EXCEPTIONS(fs::permissions(path, fs::owner_all));
 
 	ldb::Options o;
 	o.max_open_files = 256;
@@ -138,6 +136,9 @@ void State::paranoia(std::string const& _when, bool _enforceRefs) const
 
 State& State::operator=(State const& _s)
 {
+	if (&_s == this)
+		return *this;
+
 	m_db = _s.m_db;
 	m_state.open(&m_db, _s.m_state.root(), Verification::Skip);
 	m_cache = _s.m_cache;
@@ -487,7 +488,7 @@ std::pair<ExecutionResult, TransactionReceipt> State::execute(EnvInfo const& _en
 	else
 	{
 		commit();
-	
+
 #if ETH_PARANOIA && !ETH_FATDB
 		ctrace << "Executed; now" << rootHash();
 		ctrace << old.diff(*this);

@@ -30,8 +30,24 @@
 #include "Context.h"
 
 namespace Ui { class Transact; }
-namespace dev { namespace eth { class Client; } }
-namespace dev { namespace solidity { class CompilerStack; } }
+
+namespace dev
+{
+
+namespace eth { class Client; }
+namespace solidity { class CompilerStack; }
+
+namespace az
+{
+
+struct GasRequirements
+{
+	qint64 neededGas;
+	qint64 baseGas;
+	qint64 executionGas;
+	qint64 refundedGas;
+	dev::eth::ExecutionResult er;
+};
 
 class Transact: public QDialog
 {
@@ -65,6 +81,7 @@ private:
 	void updateNonce();
 
 	dev::Address fromAccount();
+	dev::Address toAccount();
 	void updateDestination();
 	void updateFee();
 	bool isCreation() const;
@@ -73,6 +90,7 @@ private:
 	dev::u256 value() const;
 	dev::u256 gasPrice() const;
 	dev::Address to() const;
+	GasRequirements determineGasRequirements();
 
 	std::string natspecNotice(dev::Address _to, dev::bytes const& _data);
 	dev::Secret findSecret(dev::u256 _totalReq) const;
@@ -88,3 +106,7 @@ private:
 	NatSpecFace* m_natSpecDB = nullptr;
 	bool m_allGood = false;
 };
+
+}
+}
+
