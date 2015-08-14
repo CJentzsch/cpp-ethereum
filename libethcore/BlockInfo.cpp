@@ -129,6 +129,12 @@ void BlockInfo::populateFromHeader(RLP const& _header, Strictness _s)
 		_e << errinfo_name("invalid block header format") << BadFieldError(field, toHex(_header[field].data().toBytes()));
 		throw;
 	}
+	catch (std::exception const& _e)
+	{
+		cerr << "BadFieldError: index: " << field << " value: "<< toHex(_header[field].data().toBytes());
+		cerr << _e.what();
+		throw;
+	}
 
 	if (m_number > ~(unsigned)0)
 		BOOST_THROW_EXCEPTION(InvalidNumber());

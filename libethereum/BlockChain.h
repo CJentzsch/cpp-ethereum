@@ -438,6 +438,20 @@ public:
 				ex << errinfo_extraData(h.extraData());
 			if (_onBad)
 				_onBad(ex);
+
+			std::cout << "AAHHHAA................\n" << boost::diagnostic_information(ex);
+			throw;
+		}
+		catch (std::exception const& _e)
+		{
+			std::cout << "AAHHHAA................\n" << _e.what();
+			std::cin.get();
+			throw;
+		}
+		catch (...)
+		{
+			std::cout << "AAHHHAA................\n" << std::endl;
+			std::cin.get();
 			throw;
 		}
 

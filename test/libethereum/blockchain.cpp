@@ -205,16 +205,29 @@ void doBlockchainTests(json_spirit::mValue& _v, bool _fillin)
 				bc.sync(uncleBlockQueue, state.db(), 4);
 				//block.commitToSeal(bc);
 
+
+				cout << "get genesis block\n";
 				//Block block(State::openDB(bc.genesisHash()), BaseState::Empty, biGenesisBlock.beneficiary());
-				Block block = bc.genesisBlock(State::openDB(bc.genesisHash())); //NOT CLEAR WHAT IT RETURNS IF bc INITIALIZED WITH CUSTOM GENESIS BLOCK
+				Block block = bc.genesisBlock(trueState.db()); // trueState.openDB(bc.genesisHash())); //NOT CLEAR WHAT IT RETURNS IF bc INITIALIZED WITH CUSTOM GENESIS BLOCK
+
+				cout << "done!\n";
+
+
+
 				//Block block (State::openDB(biGenesisBlock.hash()));
 				//Block block(state.db(), BaseState::Empty);
 				//mine a new block on top of previously imported
 				try
 				{
+					cout << "sync\n";
 					block.sync(bc);
+					cout << "snyc txs\n";
 					block.sync(bc, txs, gp);
+					cout << "commit to seal\n";
+					block.commitToSeal(bc);
+					cout << "start mine\n";
 					mine(block, bc);
+					cout << "done mining\n";
 				}
 				catch (Exception const& _e)
 				{
@@ -295,7 +308,9 @@ void doBlockchainTests(json_spirit::mValue& _v, bool _fillin)
 				try
 				{
 					block.sync(bc);
+					cout << "try to import!!\n";
 					bc.import(block2.out(), block.db());
+					cout << "done import!!\n";
 					block.sync(bc);
 					//block.commit();
 
@@ -322,15 +337,20 @@ void doBlockchainTests(json_spirit::mValue& _v, bool _fillin)
 				// if exception is thrown, RLP is invalid and no blockHeader, Transaction list, or Uncle list should be given
 				catch (...)
 				{
+					cout << "catched!!\n";
 					cnote << "block is invalid!\n";
 					blObj.erase(blObj.find("blockHeader"));
 					blObj.erase(blObj.find("uncleHeaders"));
 					blObj.erase(blObj.find("transactions"));
+					cout << "done catch!\n";
 				}
 				blArray.push_back(blObj);
 				this_thread::sleep_for(chrono::seconds(1));
+				cout << "hmmm!\n";
 			} //for blocks
 
+
+			cout << "hmmm2!\n";
 			if (o.count("expect") > 0)
 			{
 				AccountMaskMap expectStateMap;
@@ -348,6 +368,8 @@ void doBlockchainTests(json_spirit::mValue& _v, bool _fillin)
 			State prestate(OverlayDB(), BaseState::Empty);
 			ImportTest::importState(o["pre"].get_obj(), prestate);
 			o["pre"] = fillJsonWithState(prestate);
+
+			cout << "done fillin!\n";
 		}//_fillin
 		else
 		{
